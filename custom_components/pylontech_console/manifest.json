@@ -1,0 +1,13 @@
+{  "domain": "pylontech_console",
+  "name": "Pylontech BMS via console",
+  "documentation": "https://github.com/mletenay/home-assistant-pylontech-console",
+  "issue_tracker": "https://github.com/mletenay/home-assistant-pylontech-console/issues",
+  "dependencies": [],
+  "codeowners": [
+    "@mletenay"
+  ],
+  "requirements": [],
+  "config_flow": true,
+  "version": "1.0.0",
+  "iot_class": "local_polling"
+}
