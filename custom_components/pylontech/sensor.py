@@ -118,14 +118,16 @@ class PylontectSensorEntity(
         sensor_id: str,
         name: str,
         unit: str,
-        bmu: str,
+        bmu: int,
     ) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
         self._attr_name = name
         self._attr_unique_id = f"{sensor_id}-{coordinator.serial_nr}"
         self._attr_device_info = (
-            coordinator.unit_device_infos[bmu] if bmu else coordinator.device_info
+            coordinator.unit_device_infos[bmu]
+            if bmu is not None
+            else coordinator.device_info
         )
         self.entity_description = _DESCRIPTIONS.get(unit, DIAG_SENSOR)
         self._sensor_id = sensor_id
