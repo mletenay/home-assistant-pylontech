@@ -1,3 +1,3 @@
-# home-assistant-pylontech-console
+# home-assistant-pylontech
 
-Home Assistant custom component for Pylontech (high voltage) BMS accessed via serial console
+Home Assistant custom component for Pylontech (high voltage) BMS (accessed via serial console)

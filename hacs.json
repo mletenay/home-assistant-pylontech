@@ -1,5 +1,5 @@
 {
-  "name": "Pylontech BMS via serial console",
+  "name": "Pylontech BMS",
   "country": "SK",
   "domains": ["sensor"],
   "homeassistant": "2023.3.0"

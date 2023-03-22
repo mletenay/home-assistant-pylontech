@@ -7,14 +7,15 @@
         "error": {
             "connection_error": "Failed to connect"
         },
-        "flow_title": "Phoenix Contact Electric Vehicle Charger",
+        "flow_title": "Pylontech BMS",
         "step": {
             "user": {
                 "data": {
-                    "host": "IP Address"
+                    "host": "IP Address",
+                    "port": "Port"
                 },
-                "description": "Connect to vehicle charger",
-                "title": "Phoenix Contact Electric Vehicle Charger"
+                "description": "Connect to Pylontech BMS",
+                "title": "Pylontech BMS"
             }
         }
     }

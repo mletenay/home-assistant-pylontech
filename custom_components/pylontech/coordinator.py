@@ -4,14 +4,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from .pylontech import InfoCommand, PylontechConsole, Sensor
+from .pylontech import InfoCommand, PylontechBMS, Sensor
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DEFAULT_NAME, DOMAIN, SCAN_INTERVAL
+from .const import DOMAIN, SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self,
         hass: HomeAssistant,
         entry: ConfigEntry,
-        pylontech: PylontechConsole,
+        pylontech: PylontechBMS,
         info: InfoCommand,
     ) -> None:
         """Initialize update coordinator."""
@@ -34,7 +34,7 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             update_interval=SCAN_INTERVAL,
             update_method=self._async_update_data,
         )
-        self.pylontech: PylontechConsole = pylontech
+        self.pylontech = pylontech
         self.serial_nr = info.module_barcode.value
         self.device_info = _device(info)
         self.unit_device_infos = tuple(
@@ -50,8 +50,8 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             pwr = await self.pylontech.pwr()
             result = {k: v.value for k, v in vars(pwr).items()}
             unit = await self.pylontech.unit()
-            for i, u in enumerate(unit.values):
-                result.update({f"{k}_bmu_{i}": v.value for k, v in vars(u).items()})
+            for i, unt in enumerate(unit.values):
+                result.update({f"{k}_bmu_{i}": v.value for k, v in vars(unt).items()})
             await self.pylontech.disconnect()
             return result
         except ValueError as ex:

@@ -6,7 +6,7 @@ from typing import Any
 import logging
 import voluptuous as vol
 
-from .pylontech import PylontechConsole
+from .pylontech import PylontechBMS
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
@@ -19,7 +19,7 @@ from .const import (
 
 CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_HOST, default="192.168.1.193"): str,
+        vol.Required(CONF_HOST, default="pylontech.local"): str,
         vol.Required(CONF_PORT, default=1234): int,
     }
 )
@@ -27,7 +27,7 @@ CONFIG_SCHEMA = vol.Schema(
 _LOGGER = logging.getLogger(__name__)
 
 
-class PylontechConsoleFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class PylontechFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a Pylontech BMS config flow."""
 
     VERSION = 1
@@ -42,14 +42,14 @@ class PylontechConsoleFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             port = user_input[CONF_PORT]
 
             try:
-                pylontech = PylontechConsole(host, port)
+                pylontech = PylontechBMS(host, port)
                 await pylontech.connect()
                 info = await pylontech.info()
                 await pylontech.disconnect()
             except Exception:
                 errors["base"] = "connection_error"
             else:
-                await self.async_set_unique_id(info.module_barcode)
+                await self.async_set_unique_id(info.module_barcode.value)
                 self._abort_if_unique_id_configured()
 
                 return self.async_create_entry(

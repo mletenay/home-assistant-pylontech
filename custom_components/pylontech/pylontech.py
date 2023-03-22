@@ -1,4 +1,4 @@
-"""Package for reading data from Pylontech (high voltage) BMS accessed via console."""
+"""Package for reading data from Pylontech (high voltage) BMS."""
 from __future__ import annotations
 
 import asyncio
@@ -29,7 +29,7 @@ class Text(Sensor):
     def __init__(self, name: str) -> None:
         super().__init__(name, " ", None)
 
-    def set(self, source: str) -> Integer:
+    def set(self, source: str) -> Text:
         self.value = source
         return self
 
@@ -301,8 +301,8 @@ class InfoCommand(Command):
         return result
 
 
-class PylontechConsole(object):
-    """Pylontech BMS console connection class"""
+class PylontechBMS(object):
+    """Pylontech BMS connection class"""
 
     _END_PROMPTS = ("Command completed successfully", "$$")
 

@@ -1,4 +1,4 @@
-"""Support for Pylontech (high voltage) BMS accessed via console."""
+"""Support for Pylontech BMS."""
 import logging
 
 from .const import (
@@ -7,14 +7,12 @@ from .const import (
     PLATFORMS,
 )
 from .coordinator import PylontechUpdateCoordinator
-from .pylontech import PylontechConsole
+from .pylontech import PylontechBMS
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         _LOGGER.debug("Connecting to Pylontech BMS at %s port %s", host, port)
-        pylontech = PylontechConsole(host, port)
+        pylontech = PylontechBMS(host, port)
         await pylontech.connect()
         info = await pylontech.info()
         await pylontech.disconnect()

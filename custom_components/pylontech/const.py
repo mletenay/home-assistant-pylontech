@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from homeassistant.const import Platform
 
-DOMAIN = "pylontech_console"
+DOMAIN = "pylontech"
 
 PLATFORMS = [Platform.SENSOR]
 
