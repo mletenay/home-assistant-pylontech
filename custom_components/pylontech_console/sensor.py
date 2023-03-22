@@ -1,6 +1,8 @@
 """Pylontech (high voltage) BMS sensors."""
 from __future__ import annotations
 
+import logging
+
 from .const import DOMAIN, KEY_COORDINATOR
 from .coordinator import PylontechUpdateCoordinator
 
@@ -22,6 +24,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+_LOGGER = logging.getLogger(__name__)
 
 
 _DESCRIPTIONS: dict[str, SensorEntityDescription] = {
@@ -80,12 +84,25 @@ async def async_setup_entry(
         KEY_COORDINATOR
     ]
 
-    # Individual inverter sensors entities
     entities: list[PylontectSensorEntity] = []
+
+    # Core BMS sensors
     entities.extend(
-        PylontectSensorEntity(coordinator, id, sensor.name, sensor.unit)
-        for id, sensor in coordinator.sensors.items()
+        PylontectSensorEntity(coordinator, sensor_id, sensor.name, sensor.unit, None)
+        for sensor_id, sensor in coordinator.sensors.items()
     )
+    # Battery units sensors
+    for bmu in range(len(coordinator.unit_device_infos)):
+        entities.extend(
+            PylontectSensorEntity(
+                coordinator,
+                f"{sensor_id}_bmu_{bmu}",
+                f"{sensor.name} (bmu {bmu})",
+                sensor.unit,
+                bmu,
+            )
+            for sensor_id, sensor in coordinator.unit_sensors.items()
+        )
 
     async_add_entities(entities)
 
@@ -98,19 +115,22 @@ class PylontectSensorEntity(
     def __init__(
         self,
         coordinator: PylontechUpdateCoordinator,
-        sensor: str,
+        sensor_id: str,
         name: str,
         unit: str,
+        bmu: str,
     ) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
         self._attr_name = name
-        self._attr_unique_id = f"{sensor}-{coordinator.serial_nr}"
-        self._attr_device_info = coordinator.device_info
+        self._attr_unique_id = f"{sensor_id}-{coordinator.serial_nr}"
+        self._attr_device_info = (
+            coordinator.unit_device_infos[bmu] if bmu else coordinator.device_info
+        )
         self.entity_description = _DESCRIPTIONS.get(unit, DIAG_SENSOR)
-        self._sensor = sensor
+        self._sensor_id = sensor_id
 
     @property
     def native_value(self):
         """Return the value reported by the sensor."""
-        return self.coordinator.sensor_value(self._sensor)
+        return self.coordinator.sensor_value(self._sensor_id)

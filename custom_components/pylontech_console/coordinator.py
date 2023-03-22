@@ -36,40 +36,56 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.pylontech: PylontechConsole = pylontech
         self.serial_nr = info.module_barcode.value
-        self.device_info = _device_info(pylontech, info)
+        self.device_info = _device(info)
+        self.unit_device_infos = tuple(
+            _unit_device(info, idx, bmu) for idx, bmu in enumerate(info.bmu_modules)
+        )
         self.sensors: dict[str, Sensor] = {}
+        self.unit_sensors: dict[str, Sensor] = {}
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from the inverter."""
         try:
             await self.pylontech.connect()
             pwr = await self.pylontech.pwr()
+            result = {k: v.value for k, v in vars(pwr).items()}
+            unit = await self.pylontech.unit()
+            for i, u in enumerate(unit.values):
+                result.update({f"{k}_bmu_{i}": v.value for k, v in vars(u).items()})
             await self.pylontech.disconnect()
-            return {k: v.value for k, v in vars(pwr).items()}
+            return result
         except ValueError as ex:
             raise UpdateFailed(ex) from ex
 
-    async def detect_sensors(self) -> dict[str, Sensor]:
+    async def detect_sensors(self) -> None:
         """Retrieve all supported sensor names from BMS"""
         await self.pylontech.connect()
         pwr = await self.pylontech.pwr()
-        await self.pylontech.disconnect()
         self.sensors = vars(pwr)
-        return self.sensors
+        unit = await self.pylontech.unit()
+        self.unit_sensors = vars(unit.values[0])
+        await self.pylontech.disconnect()
 
     def sensor_value(self, sensor: str) -> Any:
         """Answer current value of the sensor."""
         return self.data.get(sensor)
 
 
-def _device_info(pylontech: PylontechConsole, info: InfoCommand) -> DeviceInfo:
+def _device(info: InfoCommand) -> DeviceInfo:
     return DeviceInfo(
         # configuration_url=f"telnet://{pylontech.host}:{pylontech.port}",
         identifiers={(DOMAIN, info.module_barcode.value)},
-        name=DEFAULT_NAME,
+        name="Pylontech BMS",
         model=info.device_name.value,
         manufacturer=info.manufacturer.value,
-        sw_version=f"{info.main_sw_version.value} / {info.sw_version.value}"
-        #        hw_version
-        #        via_device
+        sw_version=f"{info.main_sw_version.value} / {info.sw_version.value}",
+    )
+
+
+def _unit_device(info: InfoCommand, idx: int, bmu: str) -> DeviceInfo:
+    return DeviceInfo(
+        identifiers={(DOMAIN, bmu)},
+        name=f"Pylontech BMU #{idx}",
+        manufacturer=info.manufacturer.value,
+        via_device=(DOMAIN, info.module_barcode.value),
     )

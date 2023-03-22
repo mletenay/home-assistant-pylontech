@@ -284,8 +284,8 @@ class InfoCommand(Command):
         self.relay_feedback = Text("Relay Feedback").set(lines[19].split()[3])
 
         bmus = lines[20:]
-        self.bmu_modules = []
-        self.bmu_pcbas = []
+        self.bmu_modules: tuple[str] = []
+        self.bmu_pcbas: tuple[str] = []
 
         for line in bmus:
             if line.startswith("Module"):
