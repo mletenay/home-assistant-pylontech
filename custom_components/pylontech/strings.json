@@ -2,7 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "Pylontech BMS",
         "description": "Connect to Pylontech BMS",
         "data": {
           "host": "[%key:common::config_flow::data::ip%]",

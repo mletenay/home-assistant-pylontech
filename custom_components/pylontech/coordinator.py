@@ -52,19 +52,22 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             unit = await self.pylontech.unit()
             for i, unt in enumerate(unit.values):
                 result.update({f"{k}_bmu_{i}": v.value for k, v in vars(unt).items()})
-            await self.pylontech.disconnect()
             return result
-        except ValueError as ex:
+        except Exception as ex:
             raise UpdateFailed(ex) from ex
+        finally:
+            await self.pylontech.disconnect()
 
     async def detect_sensors(self) -> None:
         """Retrieve all supported sensor names from BMS"""
-        await self.pylontech.connect()
-        pwr = await self.pylontech.pwr()
-        self.sensors = vars(pwr)
-        unit = await self.pylontech.unit()
-        self.unit_sensors = vars(unit.values[0])
-        await self.pylontech.disconnect()
+        try:
+            await self.pylontech.connect()
+            pwr = await self.pylontech.pwr()
+            self.sensors = vars(pwr)
+            unit = await self.pylontech.unit()
+            self.unit_sensors = vars(unit.values[0])
+        finally:
+            await self.pylontech.disconnect()
 
     def sensor_value(self, sensor: str) -> Any:
         """Answer current value of the sensor."""

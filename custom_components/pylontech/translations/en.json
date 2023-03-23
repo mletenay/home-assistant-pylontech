@@ -15,7 +15,6 @@
                     "port": "Port"
                 },
                 "description": "Connect to Pylontech BMS",
-                "title": "Pylontech BMS"
             }
         }
     }

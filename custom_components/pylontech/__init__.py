@@ -28,9 +28,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         pylontech = PylontechBMS(host, port)
         await pylontech.connect()
         info = await pylontech.info()
-        await pylontech.disconnect()
     except Exception as err:
         raise ConfigEntryNotReady from err
+    finally:
+        await pylontech.disconnect()
 
     # Create update coordinator
     coordinator = PylontechUpdateCoordinator(hass, entry, pylontech, info)

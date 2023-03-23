@@ -15,6 +15,7 @@ async def _test_command():
     pylon = PylontechBMS("192.168.1.193", 1234)
     await pylon.connect()
     cmd = await pylon.info()
+    await pylon.disconnect()
     print(cmd)
 
 

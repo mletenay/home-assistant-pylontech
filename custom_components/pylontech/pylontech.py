@@ -348,9 +348,10 @@ class PylontechBMS(object):
 
     async def disconnect(self) -> None:
         """Diconnect from BMS console."""
-        if self.reader is not None:
+        if self.writer is not None:
             self.writer.close()
             await self.writer.wait_closed()
+            self.reader = None
             self.writer = None
 
     async def bat(self) -> BatCommand:
