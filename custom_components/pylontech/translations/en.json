@@ -14,7 +14,7 @@
                     "host": "IP Address",
                     "port": "Port"
                 },
-                "description": "Connect to Pylontech BMS",
+                "description": "Connect to Pylontech BMS"
             }
         }
     }

@@ -13,8 +13,8 @@ logging.basicConfig(
 
 async def _test_command():
     pylon = PylontechBMS("192.168.1.193", 1234)
-    await pylon.connect()
-    cmd = await pylon.info()
+    await asyncio.wait_for(pylon.connect(), 2)
+    cmd = await asyncio.wait_for(pylon.info(), 1)
     await pylon.disconnect()
     print(cmd)
 

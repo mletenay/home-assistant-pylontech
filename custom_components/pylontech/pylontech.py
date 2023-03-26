@@ -5,6 +5,7 @@ import asyncio
 import logging
 
 from asyncio import StreamReader, StreamWriter
+from asyncio.exceptions import TimeoutError
 from dataclasses import dataclass
 from typing import Any
 
@@ -30,6 +31,7 @@ class Text(Sensor):
         super().__init__(name, " ", None)
 
     def set(self, source: str) -> Text:
+        """Decode and set value from source string."""
         self.value = source
         return self
 
@@ -41,6 +43,7 @@ class Integer(Sensor):
         super().__init__(name, "", None)
 
     def set(self, source: str) -> Integer:
+        """Decode and set value from source string."""
         self.value = int(source)
         return self
 
@@ -52,6 +55,7 @@ class Percent(Sensor):
         super().__init__(name, "%", None)
 
     def set(self, source: str) -> Percent:
+        """Decode and set value from source string."""
         self.value = int(source.replace("%", ""))
         return self
 
@@ -63,6 +67,7 @@ class Current(Sensor):
         super().__init__(name, "A", None)
 
     def set(self, source: str, divider: int = 1000) -> Current:
+        """Decode and set value from source string."""
         try:
             self.value = int(source) / divider
         except ValueError:
@@ -77,6 +82,7 @@ class Voltage(Sensor):
         super().__init__(name, "V", None)
 
     def set(self, source: str, divider: int = 1000) -> Voltage:
+        """Decode and set value from source string."""
         self.value = int(source) / divider
         return self
 
@@ -88,6 +94,7 @@ class ChargeAh(Sensor):
         super().__init__(name, "Ah", None)
 
     def set(self, source: str, divider: int = 1000) -> ChargeAh:
+        """Decode and set value from source string."""
         self.value = int(source) / divider
         return self
 
@@ -99,6 +106,7 @@ class ChargeWh(Sensor):
         super().__init__(name, "Wh", None)
 
     def set(self, source: str, divider: int = 1) -> ChargeWh:
+        """Decode and set value from source string."""
         self.value = int(source) / divider
         return self
 
@@ -110,15 +118,12 @@ class Temp(Sensor):
         super().__init__(name, "C", None)
 
     def set(self, source: str) -> Temp:
+        """Decode and set value from source string."""
         self.value = int(source) / 1000
         return self
 
 
-class Command(object):
-    """Superclass for console commands."""
-
-
-class UnitCommand(Command):
+class UnitCommand:
     """Pylontech BMS console command 'unit'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -164,7 +169,7 @@ class UnitValues:
         return result
 
 
-class PwrCommand(Command):
+class PwrCommand:
     """Pylontech BMS console command 'pwr'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -206,7 +211,7 @@ class PwrCommand(Command):
         return result
 
 
-class BatCommand(Command):
+class BatCommand:
     """Pylontech BMS console command 'bat'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -257,7 +262,7 @@ coulomb_WH: {self.charge_wh_perc} ({self.charge_wh} WH)
 bal: {self.bal}"""
 
 
-class InfoCommand(Command):
+class InfoCommand:
     """Pylontech BMS console command 'info'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -301,7 +306,7 @@ class InfoCommand(Command):
         return result
 
 
-class PylontechBMS(object):
+class PylontechBMS:
     """Pylontech BMS connection class"""
 
     _END_PROMPTS = ("Command completed successfully", "$$")
@@ -315,13 +320,13 @@ class PylontechBMS(object):
     async def _exec_cmd(self, cmd: str) -> tuple[str]:
         """Send the command to BMS and parse the response."""
         self.writer.write((cmd + "\r").encode("ascii"))
-        await self.writer.drain()
+        await asyncio.wait_for(self.writer.drain(), 2)
         lines = []
         linebytes = bytearray()
         while linebytes != b"pylon>":
             # Read it by smaller chunks since on linux
             # large reads somehow weirdly do not work
-            data = await self.reader.read(120)
+            data = await asyncio.wait_for(self.reader.read(120), 2)
             for i in data:
                 # there seem to be mix of LF and CR+LF line endings
                 if i != 13 and i != 10:
@@ -344,7 +349,9 @@ class PylontechBMS(object):
 
     async def connect(self) -> None:
         """Connect to BMS console."""
-        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+        self.reader, self.writer = await asyncio.wait_for(
+            asyncio.open_connection(self.host, self.port), 5
+        )
 
     async def disconnect(self) -> None:
         """Diconnect from BMS console."""
