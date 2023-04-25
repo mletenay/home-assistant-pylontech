@@ -5,7 +5,6 @@ import asyncio
 import logging
 
 from asyncio import StreamReader, StreamWriter
-from asyncio.exceptions import TimeoutError
 from dataclasses import dataclass
 from typing import Any
 
@@ -35,6 +34,13 @@ class Text(Sensor):
         self.value = source
         return self
 
+    def fetch(self, source: list[str], lookup: str = None) -> Text:
+        """Decode (if present) and set value (after : separator) from list of string."""
+        if (lookup if lookup else self.name) in source[0]:
+            self.value = source[0].split(":")[1]
+            source.pop(0)
+            return self
+
 
 class Integer(Sensor):
     """Sensor representing integer value"""
@@ -46,6 +52,13 @@ class Integer(Sensor):
         """Decode and set value from source string."""
         self.value = int(source)
         return self
+
+    def fetch(self, source: list[str], lookup: str = None) -> Integer:
+        """Decode (if present) and set value (after : separator) from list of string."""
+        if (lookup if lookup else self.name) in source[0]:
+            self.value = int(source[0].split(":")[1])
+            source.pop(0)
+            return self
 
 
 class Percent(Sensor):
@@ -73,6 +86,13 @@ class Current(Sensor):
         except ValueError:
             self.value = int(source.replace("mA", "")) / divider
         return self
+
+    def fetch(self, source: list[str], lookup: str = None) -> Current:
+        """Decode (if present) and set value (after : separator) from list of string."""
+        if (lookup if lookup else self.name) in source[0]:
+            self.value = int(source[0].split(":")[1].replace("mA", ""))
+            source.pop(0)
+            return self
 
 
 class Voltage(Sensor):
@@ -227,8 +247,9 @@ class BatCommand:
     def __str__(self) -> str:
         result = ""
         for val in vars(self).values():
-            result += str(val)
-            result += "\n"
+            if val is not None:
+                result += str(val)
+                result += "\n"
         return result
 
 
@@ -266,33 +287,36 @@ class InfoCommand:
     """Pylontech BMS console command 'info'."""
 
     def __init__(self, lines: tuple[str]) -> None:
-        self.device_address = Integer("Device address").set(lines[0].split()[3])
-        self.manufacturer = Text("Manufacturer").set(lines[1].split()[2])
-        self.device_name = Text("Device name").set(lines[2].split()[3])
-        self.board_version = Text("Board version").set(lines[3].split()[3])
-        self.main_sw_version = Text("Main Soft version").set(lines[4].split()[4])
-        self.sw_version = Text("Soft version").set(lines[5].split()[3])
-        self.boot_version = Text("Boot version").set(lines[6].split()[3])
-        self.comm_version = Text("Comm version").set(lines[7].split()[3])
-        self.release_date = Text("Release Date").set(lines[8].split()[3])
-        self.pcba_barcode = Text("PCBA Barcode").set(lines[10].split()[3])
-        self.module_barcode = Text("Module Barcode").set(lines[11].split()[3])
-        self.pwr_supply_barcode = Text("PowerSupply Barcode").set(lines[12].split()[3])
-        self.device_test_time = Text("Device Test Time").set(lines[13].split()[4])
-        self.specification = Text("Specification").set(lines[14].split()[2])
-        self.cell_number = Integer("Cell Number").set(lines[15].split()[3])
-        self.max_discharge_current = Current("Max Discharge Curr").set(
-            lines[16].split()[4]
+        source = list(lines)
+        self.device_address = Integer("Device address").fetch(source)
+        self.manufacturer = Text("Manufacturer").fetch(source)
+        self.device_name = Text("Device name").fetch(source)
+        self.board_version = Text("Board version").fetch(source)
+        self.hard_version = Text("Hard version").fetch(source, "Hard  version")
+        self.main_sw_version = Text("Main Soft version").fetch(source)
+        self.sw_version = Text("Soft version").fetch(source, "Soft  version")
+        self.boot_version = Text("Boot version").fetch(source, "Boot  version")
+        self.comm_version = Text("Comm version").fetch(source)
+        self.release_date = Text("Release Date").fetch(source)
+        self.barcode = Text("Barcode").fetch(source)
+        self.pcba_barcode = Text("PCBA Barcode").fetch(source)
+        self.module_barcode = Text("Module Barcode").fetch(source)
+        self.pwr_supply_barcode = Text("PowerSupply Barcode").fetch(source)
+        self.device_test_time = Text("Device Test Time").fetch(source)
+        self.specification = Text("Specification").fetch(source)
+        self.cell_number = Integer("Cell Number").fetch(source)
+        self.max_discharge_current = Current("Max Discharge Curr").fetch(
+            source, "Max Dischg Curr"
         )
-        self.max_charge_current = Current("Max Charge Curr").set(lines[17].split()[4])
-        self.shut_circuit = Text("Shut Circuit").set(lines[18].split()[3])
-        self.relay_feedback = Text("Relay Feedback").set(lines[19].split()[3])
+        self.max_charge_current = Current("Max Charge Curr").fetch(source)
+        self.shut_circuit = Text("Shut Circuit").fetch(source)
+        self.relay_feedback = Text("Relay Feedback").fetch(source)
+        self.new_board = Text("New Board").fetch(source)
 
-        bmus = lines[20:]
         self.bmu_modules: tuple[str] = []
         self.bmu_pcbas: tuple[str] = []
 
-        for line in bmus:
+        for line in source:
             if line.startswith("Module"):
                 self.bmu_modules.insert(0, line.split()[2])
             if line.startswith("PCBA"):
@@ -301,8 +325,9 @@ class InfoCommand:
     def __str__(self) -> str:
         result = ""
         for val in vars(self).values():
-            result += str(val)
-            result += "\n"
+            if val is not None:
+                result += str(val)
+                result += "\n"
         return result
 
 
