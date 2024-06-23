@@ -1,10 +1,9 @@
 """Update coordinator for Pylontech BMS."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
-
-from .pylontech import InfoCommand, PylontechBMS, Sensor
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -12,6 +11,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN, SCAN_INTERVAL
+from .pylontech import InfoCommand, PylontechBMS, Sensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             await self.pylontech.disconnect()
 
     async def detect_sensors(self) -> None:
-        """Retrieve all supported sensor names from BMS"""
+        """Retrieve all supported sensor names from BMS."""
         try:
             await self.pylontech.connect()
             pwr = await self.pylontech.pwr()

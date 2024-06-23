@@ -1,8 +1,10 @@
 """Simple test script to check Pylontech BMS communication"""
-from custom_components.pylontech.pylontech import PylontechBMS
+
 import asyncio
 import logging
 import sys
+
+from custom_components.pylontech.pylontech import PylontechBMS
 
 logging.basicConfig(
     format="%(asctime)-15s %(funcName)s(%(lineno)d) - %(levelname)s: %(message)s",
@@ -12,7 +14,7 @@ logging.basicConfig(
 
 
 async def _test_command():
-    pylon = PylontechBMS("192.168.1.193", 1234)
+    pylon = PylontechBMS("192.168.2.51", 1234)
     await asyncio.wait_for(pylon.connect(), 2)
     cmd = await asyncio.wait_for(pylon.info(), 1)
     await pylon.disconnect()

@@ -1,21 +1,18 @@
 """Config flow to configure Pylontech BMS integration."""
+
 from __future__ import annotations
 
+import logging
 from typing import Any
 
-import logging
 import voluptuous as vol
-
-from .pylontech import PylontechBMS
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import (
-    DEFAULT_NAME,
-    DOMAIN,
-)
+from .const import DEFAULT_NAME, DOMAIN
+from .pylontech import PylontechBMS
 
 CONFIG_SCHEMA = vol.Schema(
     {

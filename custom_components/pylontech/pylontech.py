@@ -1,11 +1,11 @@
 """Package for reading data from Pylontech (high voltage) BMS."""
+
 from __future__ import annotations
 
 import asyncio
-import logging
-
 from asyncio import StreamReader, StreamWriter
 from dataclasses import dataclass
+import logging
 from typing import Any
 
 _LOGGER = logging.getLogger(__name__)
@@ -13,20 +13,22 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class Sensor:
-    """Definition of inverter sensor and its attributes"""
+    """Definition of inverter sensor and its attributes."""
 
     name: str
     unit: str
     value: Any
 
     def __str__(self):
+        """Return string representation of sensor."""
         return f"{self.name}: {self.value} {self.unit}"
 
 
 class Text(Sensor):
-    """Sensor representing text value"""
+    """Sensor representing text value."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the text sensor."""
         super().__init__(name, " ", None)
 
     def set(self, source: str) -> Text:
@@ -34,7 +36,7 @@ class Text(Sensor):
         self.value = source
         return self
 
-    def fetch(self, source: list[str], lookup: str = None) -> Text:
+    def fetch(self, source: list[str], lookup: str | None = None) -> Text:
         """Decode (if present) and set value (after : separator) from list of string."""
         if (lookup if lookup else self.name) in source[0]:
             self.value = source[0].split(":")[1]
@@ -43,9 +45,10 @@ class Text(Sensor):
 
 
 class Integer(Sensor):
-    """Sensor representing integer value"""
+    """Sensor representing integer value."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the integer sensor."""
         super().__init__(name, "", None)
 
     def set(self, source: str) -> Integer:
@@ -53,7 +56,7 @@ class Integer(Sensor):
         self.value = int(source)
         return self
 
-    def fetch(self, source: list[str], lookup: str = None) -> Integer:
+    def fetch(self, source: list[str], lookup: str | None = None) -> Integer:
         """Decode (if present) and set value (after : separator) from list of string."""
         if (lookup if lookup else self.name) in source[0]:
             self.value = int(source[0].split(":")[1])
@@ -62,9 +65,10 @@ class Integer(Sensor):
 
 
 class Percent(Sensor):
-    """Sensor representing percent value"""
+    """Sensor representing percent value."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the percent sensor."""
         super().__init__(name, "%", None)
 
     def set(self, source: str) -> Percent:
@@ -74,9 +78,10 @@ class Percent(Sensor):
 
 
 class Current(Sensor):
-    """Sensor representing current [A]"""
+    """Sensor representing current [A]."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the current sensor."""
         super().__init__(name, "A", None)
 
     def set(self, source: str, divider: int = 1000) -> Current:
@@ -87,7 +92,7 @@ class Current(Sensor):
             self.value = int(source.replace("mA", "")) / divider
         return self
 
-    def fetch(self, source: list[str], lookup: str = None) -> Current:
+    def fetch(self, source: list[str], lookup: str | None = None) -> Current:
         """Decode (if present) and set value (after : separator) from list of string."""
         if (lookup if lookup else self.name) in source[0]:
             self.value = int(source[0].split(":")[1].replace("mA", ""))
@@ -96,9 +101,10 @@ class Current(Sensor):
 
 
 class Voltage(Sensor):
-    """Sensor representing voltage [V]"""
+    """Sensor representing voltage [V]."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the voltage sensor."""
         super().__init__(name, "V", None)
 
     def set(self, source: str, divider: int = 1000) -> Voltage:
@@ -108,9 +114,10 @@ class Voltage(Sensor):
 
 
 class ChargeAh(Sensor):
-    """Sensor representing charge [Ah]"""
+    """Sensor representing charge [Ah]."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the charge sensor."""
         super().__init__(name, "Ah", None)
 
     def set(self, source: str, divider: int = 1000) -> ChargeAh:
@@ -120,9 +127,10 @@ class ChargeAh(Sensor):
 
 
 class ChargeWh(Sensor):
-    """Sensor representing charge [Wh]"""
+    """Sensor representing charge [Wh]."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the charge sensor."""
         super().__init__(name, "Wh", None)
 
     def set(self, source: str, divider: int = 1) -> ChargeWh:
@@ -132,9 +140,10 @@ class ChargeWh(Sensor):
 
 
 class Temp(Sensor):
-    """Sensor representing temperature [C]"""
+    """Sensor representing temperature [C]."""
 
     def __init__(self, name: str) -> None:
+        """Initialize the temp sensor."""
         super().__init__(name, "C", None)
 
     def set(self, source: str) -> Temp:
@@ -147,11 +156,13 @@ class UnitCommand:
     """Pylontech BMS console command 'unit'."""
 
     def __init__(self, lines: tuple[str]) -> None:
+        """Initialize the unit command."""
         self.values = []
         for line in lines[2:]:
             self.values.append(UnitValues(line))
 
     def __str__(self) -> str:
+        """Return string representation of unit command."""
         result = ""
         for val in self.values:
             result += str(val)
@@ -163,6 +174,7 @@ class UnitValues:
     """Class representing parameters of a unit (battery module)."""
 
     def __init__(self, line: str) -> None:
+        """Initialize the unit values object."""
         chunks = line.split()
         self.index = Integer("Index").set(chunks[0])
         self.volt = Voltage("Voltage").set(chunks[1])
@@ -182,6 +194,7 @@ class UnitValues:
         # self.Time
 
     def __str__(self):
+        """Return string representation of unit values."""
         result = ""
         for each in vars(self).values():
             result += str(each)
@@ -193,6 +206,7 @@ class PwrCommand:
     """Pylontech BMS console command 'pwr'."""
 
     def __init__(self, lines: tuple[str]) -> None:
+        """Initialize the pwr command."""
         self.avg_temp = Temp("Average temperature").set(lines[0].split()[2])
         self.dc_voltage = Voltage("DC Voltage").set(lines[1].split()[3])
         self.bat_voltage = Voltage("Bat Voltage").set(lines[2].split()[3])
@@ -224,6 +238,7 @@ class PwrCommand:
         self.error_code = Text("Error code").set(chunks[27])
 
     def __str__(self):
+        """Return string representation of pwr command."""
         result = ""
         for each in vars(self).values():
             result += str(each)
@@ -235,6 +250,7 @@ class BatCommand:
     """Pylontech BMS console command 'bat'."""
 
     def __init__(self, lines: tuple[str]) -> None:
+        """Initialize the bat sensor."""
         self.avg_temp = Temp("Average Temperature").set(lines[1].split()[1])
         self.charge_curr = Current("Charge Current").set(lines[2].split()[2])
         self.discharge_curr = Current("Discharge Current").set(lines[3].split()[2])
@@ -245,6 +261,7 @@ class BatCommand:
             self.values.append(BatValues(line))
 
     def __str__(self) -> str:
+        """Return string representation of bat command."""
         result = ""
         for val in vars(self).values():
             if val is not None:
@@ -257,6 +274,7 @@ class BatValues:
     """Class representing paramters of a battery cell."""
 
     def __init__(self, line) -> None:
+        """Initialize the bat values object."""
         chunks = line.split()
         self.bat = chunks[0]
         self.volt = int(chunks[1]) / 1000
@@ -272,6 +290,7 @@ class BatValues:
         # self.Time
 
     def __str__(self):
+        """Return string representation of bat values."""
         return f"""Bat: {self.bat}
 Volt: {self.volt} V
 Curr: {self.curr} A
@@ -287,6 +306,7 @@ class InfoCommand:
     """Pylontech BMS console command 'info'."""
 
     def __init__(self, lines: tuple[str]) -> None:
+        """Initialize the info command."""
         source = list(lines)
         self.device_address = Integer("Device address").fetch(source)
         self.manufacturer = Text("Manufacturer").fetch(source)
@@ -323,6 +343,7 @@ class InfoCommand:
                 self.bmu_pcbas.insert(0, line.split()[2])
 
     def __str__(self) -> str:
+        """Return string representation of info command."""
         result = ""
         for val in vars(self).values():
             if val is not None:
@@ -332,11 +353,12 @@ class InfoCommand:
 
 
 class PylontechBMS:
-    """Pylontech BMS connection class"""
+    """Pylontech BMS connection class."""
 
     _END_PROMPTS = ("Command completed successfully", "$$")
 
     def __init__(self, host: str, port: int) -> None:
+        """Initialize the BMS object."""
         self.host: str = host
         self.port: int = port
         self.reader: StreamReader | None = None
@@ -354,18 +376,17 @@ class PylontechBMS:
             data = await asyncio.wait_for(self.reader.read(120), 2)
             for i in data:
                 # there seem to be mix of LF and CR+LF line endings
-                if i != 13 and i != 10:
+                if i not in (13, 10):
                     linebytes.append(i)
-                else:
-                    if len(linebytes) > 0:
-                        line = linebytes.decode("ascii")
-                        if not line in self._END_PROMPTS:
-                            lines.append(line)
-                        linebytes = bytearray()
+                elif len(linebytes) > 0:
+                    line = linebytes.decode("ascii")
+                    if line not in self._END_PROMPTS:
+                        lines.append(line)
+                    linebytes = bytearray()
         if lines.pop(0) != cmd:
-            raise ValueError()
+            raise ValueError("wrong value")
         if lines.pop(0) != "@":
-            raise ValueError()
+            raise ValueError("wrong value")
         if _LOGGER.isEnabledFor(logging.DEBUG):
             _LOGGER.debug("Response lines:")
             for each in lines:
