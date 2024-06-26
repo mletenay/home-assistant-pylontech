@@ -1,6 +1,4 @@
 {
-  "name": "Pylontech BMS",
-  "country": "SK",
-  "domains": ["sensor"],
+  "name": "Pylontech BMS monitoring",
   "homeassistant": "2023.3.0"
 }
