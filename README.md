@@ -16,7 +16,7 @@ The ESP8266/32 microcontroller should be programmed and connected to Home Assist
 
 Install this component using [HACS](https://hacs.xyz/) by adding custom repository [https://github.com/mletenay/home-assistant-pylontech](https://github.com/mletenay/home-assistant-pylontech) and searching for `Pylontech` in the `Integrations`.
 
-## Configration
+## Configuration
 
 The component requires the host/IP and the port where the [Pylontech BMS console server for ESPHome](https://github.com/mletenay/esphome-stream-server) is listening.
 
