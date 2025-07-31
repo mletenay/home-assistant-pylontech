@@ -82,6 +82,8 @@ def _device(info: InfoCommand) -> DeviceInfo:
         model=info.device_name.value,
         manufacturer=info.manufacturer.value,
         sw_version=f"{info.main_sw_version.value} / {info.sw_version.value}",
+        hw_version=info.board_version.value,
+        serial_number=info.module_barcode.value,
     )
 
 
@@ -91,4 +93,5 @@ def _unit_device(info: InfoCommand, idx: int, bmu: str) -> DeviceInfo:
         name=f"Pylontech BMU #{idx}",
         manufacturer=info.manufacturer.value,
         via_device=(DOMAIN, info.module_barcode.value),
+        serial_number=bmu,
     )

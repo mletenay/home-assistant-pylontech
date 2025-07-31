@@ -41,7 +41,7 @@ class Text(Sensor):
         if (lookup if lookup else self.name) in source[0]:
             self.value = source[0].split(":")[1]
             source.pop(0)
-            return self
+        return self
 
 
 class Integer(Sensor):
@@ -61,7 +61,7 @@ class Integer(Sensor):
         if (lookup if lookup else self.name) in source[0]:
             self.value = int(source[0].split(":")[1])
             source.pop(0)
-            return self
+        return self
 
 
 class Percent(Sensor):
@@ -97,7 +97,7 @@ class Current(Sensor):
         if (lookup if lookup else self.name) in source[0]:
             self.value = int(source[0].split(":")[1].replace("mA", ""))
             source.pop(0)
-            return self
+        return self
 
 
 class Voltage(Sensor):
