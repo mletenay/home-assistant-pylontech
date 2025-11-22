@@ -282,13 +282,13 @@ class BatValues:
         self.unit = Integer("Cell unit").set(unit)
         self.volt = Voltage("Cell voltage").set(chunks[1])
         self.curr = Current("Cell current").set(chunks[2])
-        self.tempr = Current("Cell temperature").set(chunks[3])
+        self.tempr = Temp("Cell temperature").set(chunks[3])
         self.v_state = Text("Cell voltage state").set(chunks[4])
         self.t_state = Text("Cell temperature state").set(chunks[5])
         self.charge_ah_perc = Percent("Cell charge Ah %").set(chunks[6])
         self.charge_ah = ChargeAh("Cell charge Ah").set(chunks[7])
         self.charge_wh_perc = Percent("Cell charge Wh %").set(chunks[8])
-        self.charge_wh = ChargeWh("Cell charge Wh").set(chunks[9])
+        self.charge_wh = ChargeWh("Cell charge Wh", 1000).set(chunks[9])
         self.bal = Text("Cell balance").set(chunks[10])
         # self.Time
 

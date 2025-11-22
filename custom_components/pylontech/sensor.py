@@ -41,6 +41,7 @@ _DESCRIPTIONS: dict[str, SensorEntityDescription] = {
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        suggested_display_precision=2,
     ),
     "Ah": SensorEntityDescription(
         key="Ah",
