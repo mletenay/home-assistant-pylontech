@@ -288,7 +288,7 @@ class BatValues:
         self.charge_ah_perc = Percent("Cell charge Ah %").set(chunks[6])
         self.charge_ah = ChargeAh("Cell charge Ah").set(chunks[7])
         self.charge_wh_perc = Percent("Cell charge Wh %").set(chunks[8])
-        self.charge_wh = ChargeWh("Cell charge Wh", 1000).set(chunks[9])
+        self.charge_wh = ChargeWh("Cell charge Wh").set(chunks[9], 1000)
         self.bal = Text("Cell balance").set(chunks[10])
         # self.Time
 
