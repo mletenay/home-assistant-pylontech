@@ -42,6 +42,7 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.sensors: dict[str, Sensor] = {}
         self.unit_sensors: dict[str, Sensor] = {}
+        self.bat_sensors: dict[str, Sensor] = {}
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from the inverter."""
@@ -52,6 +53,14 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             unit = await self.pylontech.unit()
             for i, unt in enumerate(unit.values):
                 result.update({f"{k}_bmu_{i}": v.value for k, v in vars(unt).items()})
+            bat = await self.pylontech.bat()
+            for i, bt in enumerate(bat.values):
+                result.update(
+                    {
+                        f"{k}_cell_{bt.unit.value}_{i % 15}": v.value
+                        for k, v in vars(bt).items()
+                    }
+                )
             return result
         except Exception as ex:
             raise UpdateFailed(ex) from ex
@@ -66,6 +75,8 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self.sensors = vars(pwr)
             unit = await self.pylontech.unit()
             self.unit_sensors = vars(unit.values[0])
+            bat = await self.pylontech.bat()
+            self.bat_sensors = vars(bat.values[0])
         finally:
             await self.pylontech.disconnect()
 

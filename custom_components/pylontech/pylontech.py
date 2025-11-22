@@ -157,7 +157,7 @@ class UnitCommand:
 
     def __init__(self, lines: tuple[str]) -> None:
         """Initialize the unit command."""
-        self.values = []
+        self.values: tuple[UnitValues] = []
         for line in lines[2:]:
             self.values.append(UnitValues(line))
 
@@ -183,7 +183,7 @@ class UnitValues:
         self.cell_temp_low = Temp("Lowest cell temperature").set(chunks[4])
         self.cell_temp_high = Temp("Highest cell temperature").set(chunks[5])
         self.cell_volt_low = Voltage("Lowest cell voltage").set(chunks[6])
-        self.cell_bolt_high = Voltage("Highest cell voltage").set(chunks[7])
+        self.cell_volt_high = Voltage("Highest cell voltage").set(chunks[7])
         self.base_state = Text("Basic state").set(chunks[8])
         self.volt_state = Text("Voltage state").set(chunks[9])
         self.temp_state = Text("Temperature state").set(chunks[10])
@@ -256,9 +256,11 @@ class BatCommand:
         self.discharge_curr = Current("Discharge Current").set(lines[3].split()[2])
         self.b_state = Text("Bat State").set(lines[4].split()[1])
         self.bal_volt = Voltage("Bat Voltage").set(lines[5].split()[1], 10)
-        self.values = []
+        self.values: tuple[BatValues] = []
+        unit = len(lines) - 8  # bat returs cells in reverse units order
         for line in lines[7:]:
-            self.values.append(BatValues(line))
+            self.values.append(BatValues(line, int(unit / 15)))
+            unit = unit - 1
 
     def __str__(self) -> str:
         """Return string representation of bat command."""
@@ -273,33 +275,30 @@ class BatCommand:
 class BatValues:
     """Class representing paramters of a battery cell."""
 
-    def __init__(self, line) -> None:
+    def __init__(self, line: str, unit: int) -> None:
         """Initialize the bat values object."""
         chunks = line.split()
-        self.bat = chunks[0]
-        self.volt = int(chunks[1]) / 1000
-        self.curr = int(chunks[2]) / 1000
-        self.tempr = int(chunks[3]) / 1000
-        self.v_state = chunks[4]
-        self.t_state = chunks[5]
-        self.charge_ah_perc = chunks[6]
-        self.charge_ah = chunks[7]
-        self.charge_wh_perc = chunks[8]
-        self.charge_wh = chunks[9]
-        self.bal = chunks[10]
+        self.bat = Integer("Cell index").set(chunks[0])
+        self.unit = Integer("Cell unit").set(unit)
+        self.volt = Voltage("Cell voltage").set(chunks[1])
+        self.curr = Current("Cell current").set(chunks[2])
+        self.tempr = Current("Cell temperature").set(chunks[3])
+        self.v_state = Text("Cell voltage state").set(chunks[4])
+        self.t_state = Text("Cell temperature state").set(chunks[5])
+        self.charge_ah_perc = Percent("Cell charge Ah %").set(chunks[6])
+        self.charge_ah = ChargeAh("Cell charge Ah").set(chunks[7])
+        self.charge_wh_perc = Percent("Cell charge Wh %").set(chunks[8])
+        self.charge_wh = ChargeWh("Cell charge Wh").set(chunks[9])
+        self.bal = Text("Cell balance").set(chunks[10])
         # self.Time
 
     def __str__(self):
-        """Return string representation of bat values."""
-        return f"""Bat: {self.bat}
-Volt: {self.volt} V
-Curr: {self.curr} A
-Tempr: {self.tempr} C
-v_state: {self.v_state}
-t_state: {self.t_state}
-coulomb_AH: {self.charge_ah_perc} ({self.charge_ah} mAH)
-coulomb_WH: {self.charge_wh_perc} ({self.charge_wh} WH)
-bal: {self.bal}"""
+        """Return string representation of unit values."""
+        result = ""
+        for each in vars(self).values():
+            result += str(each)
+            result += "\n"
+        return result
 
 
 class InfoCommand:

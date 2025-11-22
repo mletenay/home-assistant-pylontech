@@ -104,6 +104,20 @@ async def async_setup_entry(
             )
             for sensor_id, sensor in coordinator.unit_sensors.items()
         )
+    # Battery cells sensors (bats are in reverse order to units)
+    for idx in reversed(range(len(coordinator.unit_device_infos) * 15)):
+        bmu = int(idx / 15)
+        cell = idx % 15
+        entities.extend(
+            PylontectSensorEntity(
+                coordinator,
+                f"{sensor_id}_cell_{bmu}_{cell}",
+                f"{sensor.name} (cell {bmu}-{cell})",
+                sensor.unit,
+                bmu,
+            )
+            for sensor_id, sensor in coordinator.bat_sensors.items()
+        )
 
     async_add_entities(entities)
 
