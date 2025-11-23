@@ -16,7 +16,6 @@ from homeassistant.const import (
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
-    UnitOfPower,
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
@@ -45,15 +44,17 @@ _DESCRIPTIONS: dict[str, SensorEntityDescription] = {
     ),
     "Ah": SensorEntityDescription(
         key="Ah",
-        device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfPower.WATT,
+        native_unit_of_measurement="Ah",
+        suggested_display_precision=1,
+        icon="mdi:home-battery-outline",
     ),
     "Wh": SensorEntityDescription(
         key="Wh",
-        device_class=SensorDeviceClass.ENERGY,
-        state_class=SensorStateClass.TOTAL,
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        icon="mdi:home-battery-outline",
     ),
     "C": SensorEntityDescription(
         key="C",
@@ -63,6 +64,7 @@ _DESCRIPTIONS: dict[str, SensorEntityDescription] = {
     ),
     "%": SensorEntityDescription(
         key="%",
+        device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
     ),

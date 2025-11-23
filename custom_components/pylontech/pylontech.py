@@ -44,6 +44,19 @@ class Text(Sensor):
         return self
 
 
+class Boolean(Sensor):
+    """Sensor representing Y/N value."""
+
+    def __init__(self, name: str) -> None:
+        """Initialize the text sensor."""
+        super().__init__(name, "Y/N", None)
+
+    def set(self, source: str) -> Text:
+        """Decode and set value from source string."""
+        self.value = source in {"Y", "y"}
+        return self
+
+
 class Integer(Sensor):
     """Sensor representing integer value."""
 
