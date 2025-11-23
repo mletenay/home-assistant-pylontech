@@ -19,6 +19,7 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -96,28 +97,32 @@ async def async_setup_entry(
         for sensor_id, sensor in coordinator.sensors.items()
     )
     # Battery units sensors
-    for bmu in range(len(coordinator.unit_device_infos)):
+    for i in range(coordinator.get_number_of_units()):
+        bmu = coordinator.get_unit_number(i)
+        _LOGGER.debug("Setting up BMU %d[#%d] sensors", i, bmu)
         entities.extend(
             PylontectSensorEntity(
                 coordinator,
                 f"{sensor_id}_bmu_{bmu}",
                 f"{sensor.name} (bmu {bmu})",
                 sensor.unit,
-                bmu,
+                i,
             )
             for sensor_id, sensor in coordinator.unit_sensors.items()
         )
     # Battery cells sensors (bats are in reverse order to units)
-    for idx in reversed(range(len(coordinator.unit_device_infos) * 15)):
-        bmu = int(idx / 15)
+    for idx in reversed(range(coordinator.get_number_of_units() * 15)):
+        bmu_idx = int(idx / 15)
+        bmu = coordinator.get_unit_number(bmu_idx)
         cell = idx % 15
+        _LOGGER.debug("Setting up cell #%d (bmu %d[#%d]) sensors", cell, bmu_idx, bmu)
         entities.extend(
             PylontectSensorEntity(
                 coordinator,
                 f"{sensor_id}_cell_{bmu}_{cell}",
                 f"{sensor.name} (cell {bmu}-{cell})",
                 sensor.unit,
-                bmu,
+                bmu_idx,
             )
             for sensor_id, sensor in coordinator.bat_sensors.items()
         )
@@ -136,15 +141,15 @@ class PylontectSensorEntity(
         sensor_id: str,
         name: str,
         unit: str,
-        bmu: int,
+        bmu_idx: int,
     ) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
         self._attr_name = name
         self._attr_unique_id = f"{sensor_id}-{coordinator.serial_nr}"
         self._attr_device_info = (
-            coordinator.unit_device_infos[bmu]
-            if bmu is not None
+            coordinator.unit_device_infos[bmu_idx]
+            if bmu_idx is not None
             else coordinator.device_info
         )
         self.entity_description = _DESCRIPTIONS.get(unit, DIAG_SENSOR)

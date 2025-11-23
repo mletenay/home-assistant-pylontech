@@ -6,6 +6,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .const import DOMAIN, KEY_COORDINATOR, PLATFORMS
 from .coordinator import PylontechUpdateCoordinator
@@ -30,8 +31,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     finally:
         await pylontech.disconnect()
 
+    # Get previously registered devices (to ensure stable order of BMUs)
+    device_registry = dr.async_get(hass)
+    bmu_serials = tuple(
+        {
+            d.serial_number
+            for d in device_registry.devices.get_devices_for_config_entry_id(
+                entry.entry_id
+            )
+            if "BMU #" in d.name
+        }
+    )
+    _LOGGER.info("Loaded existing BMU serials %s", bmu_serials)
+
     # Create update coordinator
-    coordinator = PylontechUpdateCoordinator(hass, entry, pylontech, info)
+    coordinator = PylontechUpdateCoordinator(
+        hass,
+        entry,
+        pylontech,
+        info,
+        bmu_serials,
+    )
     await coordinator.detect_sensors()
 
     # Fetch initial data so we have data when entities subscribe

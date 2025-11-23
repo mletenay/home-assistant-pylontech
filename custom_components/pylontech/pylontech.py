@@ -189,9 +189,10 @@ class UnitCommand:
     def __init__(self, lines: tuple[str]) -> None:
         """Initialize the unit command."""
         self.values: list[UnitValues] = []
+        nr_of_units = len(lines) - 1
         for line in lines[2:]:
             # unit values are presented in reversed oder, from bottom to top
-            self.values.insert(0, UnitValues(line))
+            self.values.insert(0, UnitValues(line, nr_of_units))
 
     def __str__(self) -> str:
         """Return string representation of unit command."""
@@ -205,9 +206,11 @@ class UnitCommand:
 class UnitValues(HasSensors):
     """Class representing parameters of a unit (battery module)."""
 
-    def __init__(self, line: str) -> None:
+    def __init__(self, line: str, nr_of_units: int) -> None:
         """Initialize the unit values object."""
         chunks = line.split()
+        self.position = Integer("Position").set(chunks[0])
+        self.position.value = nr_of_units - self.position.value
         self.volt = Voltage("Voltage").set(chunks[1])
         self.curr = Current("Current").set(chunks[2])
         self.temp = Temp("Temperature").set(chunks[3])

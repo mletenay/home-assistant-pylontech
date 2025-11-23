@@ -25,6 +25,7 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         entry: ConfigEntry,
         pylontech: PylontechBMS,
         info: InfoCommand,
+        bmu_serials: tuple[str],
     ) -> None:
         """Initialize update coordinator."""
         super().__init__(
@@ -34,15 +35,28 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             update_interval=SCAN_INTERVAL,
             update_method=self._async_update_data,
         )
-        self.pylontech = pylontech
-        self.serial_nr = info.module_barcode.value
-        self.device_info = _device(info)
-        self.unit_device_infos = tuple(
+        self.pylontech: PylontechBMS = pylontech
+        self.serial_nr: str = info.module_barcode.value
+        self.device_info: DeviceInfo = _device(info)
+        self.unit_device_infos: tuple[DeviceInfo] = tuple(
             _unit_device(info, idx, bmu) for idx, bmu in enumerate(info.bmu_modules)
         )
         self.sensors: dict[str, Sensor] = {}
         self.unit_sensors: dict[str, Sensor] = {}
         self.bat_sensors: dict[str, Sensor] = {}
+
+        # Get stable unit position mapping (in case unit are physically re-ordered)
+        known_positions: dict[str, int] = {b: i for i, b in enumerate(bmu_serials)}
+        serials = len(bmu_serials)
+        for d in self.unit_device_infos:
+            if d["serial_number"] not in bmu_serials:
+                known_positions[d["serial_number"]] = serials
+                serials = serials + 1
+        self._unit_positions: dict[int, int] = {
+            i: known_positions[d["serial_number"]]
+            for i, d in enumerate(self.unit_device_infos)
+        }
+        _LOGGER.debug("Created stable unit number mapping %s", self._unit_positions)
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from the inverter."""
@@ -52,14 +66,19 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             result = {k: v.value for k, v in pwr.get_sensors().items()}
             unit = await self.pylontech.unit()
             for i, unt in enumerate(unit.values):
+                bmu = self.get_unit_number(i)
+                _LOGGER.debug("Updating BMU #%d sensors", bmu)
                 result.update(
-                    {f"{k}_bmu_{i}": v.value for k, v in unt.get_sensors().items()}
+                    {f"{k}_bmu_{bmu}": v.value for k, v in unt.get_sensors().items()}
                 )
             bat = await self.pylontech.bat()
             for i, bt in enumerate(bat.values):
+                bmu = self.get_unit_number(bt.unit)
+                cell = i % 15
+                _LOGGER.debug("Updating cell #%d (bmu #%d) sensors", cell, bmu)
                 result.update(
                     {
-                        f"{k}_cell_{bt.unit}_{i % 15}": v.value
+                        f"{k}_cell_{bmu}_{cell}": v.value
                         for k, v in bt.get_sensors().items()
                     }
                 )
@@ -85,6 +104,14 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def sensor_value(self, sensor: str) -> Any:
         """Answer current value of the sensor."""
         return self.data.get(sensor)
+
+    def get_number_of_units(self) -> int:
+        """Return  number of units."""
+        return len(self._unit_positions)
+
+    def get_unit_number(self, unit_idx: int) -> int:
+        """Return stable number of unit with specified serial."""
+        return self._unit_positions[unit_idx]
 
 
 def _device(info: InfoCommand) -> DeviceInfo:
