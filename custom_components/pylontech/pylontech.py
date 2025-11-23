@@ -1,4 +1,14 @@
-"""Package for reading data from Pylontech (high voltage) BMS."""
+"""Package for reading data from Pylontech (high voltage) BMS.
+
+The 'info' BMS command returns list of BMU from top to bottom.
+Topmost unit, first in chain, right after BMS iself is reported as BMU #0.
+The last in chain is BBU #n-1
+
+However the 'unit' and 'bat' BMS commands seem to report units/cells
+in reversed order !
+Unit with index 1 is the last one in chain - BMU #n-1
+Cells with index 0-14 are from the last unit in chain.
+"""
 
 from __future__ import annotations
 
@@ -22,6 +32,14 @@ class Sensor:
     def __str__(self):
         """Return string representation of sensor."""
         return f"{self.name}: {self.value} {self.unit}"
+
+
+class HasSensors:
+    """Supeclass for BMS types with sensors attributres."""
+
+    def get_sensors(self) -> dict[str, Sensor]:
+        """Return sensor values provided by the command."""
+        return {k: v for k, v in vars(self).items() if isinstance(v, Sensor)}
 
 
 class Text(Sensor):
@@ -170,9 +188,10 @@ class UnitCommand:
 
     def __init__(self, lines: tuple[str]) -> None:
         """Initialize the unit command."""
-        self.values: tuple[UnitValues] = []
+        self.values: list[UnitValues] = []
         for line in lines[2:]:
-            self.values.append(UnitValues(line))
+            # unit values are presented in reversed oder, from bottom to top
+            self.values.insert(0, UnitValues(line))
 
     def __str__(self) -> str:
         """Return string representation of unit command."""
@@ -183,13 +202,12 @@ class UnitCommand:
         return result
 
 
-class UnitValues:
+class UnitValues(HasSensors):
     """Class representing parameters of a unit (battery module)."""
 
     def __init__(self, line: str) -> None:
         """Initialize the unit values object."""
         chunks = line.split()
-        self.index = Integer("Index").set(chunks[0])
         self.volt = Voltage("Voltage").set(chunks[1])
         self.curr = Current("Current").set(chunks[2])
         self.temp = Temp("Temperature").set(chunks[3])
@@ -215,7 +233,7 @@ class UnitValues:
         return result
 
 
-class PwrCommand:
+class PwrCommand(HasSensors):
     """Pylontech BMS console command 'pwr'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -259,7 +277,7 @@ class PwrCommand:
         return result
 
 
-class BatCommand:
+class BatCommand(HasSensors):
     """Pylontech BMS console command 'bat'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -269,11 +287,11 @@ class BatCommand:
         self.discharge_curr = Current("Discharge Current").set(lines[3].split()[2])
         self.b_state = Text("Bat State").set(lines[4].split()[1])
         self.bal_volt = Voltage("Bat Voltage").set(lines[5].split()[1], 10)
-        self.values: tuple[BatValues] = []
-        unit = len(lines) - 8  # bat returs cells in reverse units order
+        self.values: list[BatValues] = []
+        cell = len(lines) - 8  # bat returs cells in reverse units order
         for line in lines[7:]:
-            self.values.append(BatValues(line, int(unit / 15)))
-            unit = unit - 1
+            self.values.append(BatValues(line, int(cell / 15)))
+            cell = cell - 1
 
     def __str__(self) -> str:
         """Return string representation of bat command."""
@@ -285,14 +303,13 @@ class BatCommand:
         return result
 
 
-class BatValues:
+class BatValues(HasSensors):
     """Class representing paramters of a battery cell."""
 
     def __init__(self, line: str, unit: int) -> None:
         """Initialize the bat values object."""
         chunks = line.split()
-        self.bat = Integer("Cell index").set(chunks[0])
-        self.unit = Integer("Cell unit").set(unit)
+        self.unit = unit
         self.volt = Voltage("Cell voltage").set(chunks[1])
         self.curr = Current("Cell current").set(chunks[2])
         self.tempr = Temp("Cell temperature").set(chunks[3])
@@ -314,7 +331,7 @@ class BatValues:
         return result
 
 
-class InfoCommand:
+class InfoCommand(HasSensors):
     """Pylontech BMS console command 'info'."""
 
     def __init__(self, lines: tuple[str]) -> None:
@@ -345,8 +362,8 @@ class InfoCommand:
         self.relay_feedback = Text("Relay Feedback").fetch(source)
         self.new_board = Text("New Board").fetch(source)
 
-        self.bmu_modules: tuple[str] = []
-        self.bmu_pcbas: tuple[str] = []
+        self.bmu_modules: list[str] = []
+        self.bmu_pcbas: list[str] = []
 
         for line in source:
             if line.startswith("Module"):
@@ -375,6 +392,7 @@ class PylontechBMS:
         self.port: int = port
         self.reader: StreamReader | None = None
         self.writer: StreamWriter | None = None
+        self.bmus: tuple[str] = ()
 
     async def _exec_cmd(self, cmd: str) -> tuple[str]:
         """Send the command to BMS and parse the response."""
@@ -425,7 +443,9 @@ class PylontechBMS:
 
     async def info(self) -> InfoCommand:
         """Invoke the 'info' console command."""
-        return InfoCommand(await self._exec_cmd("info"))
+        result = InfoCommand(await self._exec_cmd("info"))
+        self.bmus = tuple(result.bmu_modules)
+        return result
 
     async def pwr(self) -> PwrCommand:
         """Invoke the 'pwr' console command."""

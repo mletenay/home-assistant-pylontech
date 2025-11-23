@@ -49,16 +49,18 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             await self.pylontech.connect()
             pwr = await self.pylontech.pwr()
-            result = {k: v.value for k, v in vars(pwr).items()}
+            result = {k: v.value for k, v in pwr.get_sensors().items()}
             unit = await self.pylontech.unit()
             for i, unt in enumerate(unit.values):
-                result.update({f"{k}_bmu_{i}": v.value for k, v in vars(unt).items()})
+                result.update(
+                    {f"{k}_bmu_{i}": v.value for k, v in unt.get_sensors().items()}
+                )
             bat = await self.pylontech.bat()
             for i, bt in enumerate(bat.values):
                 result.update(
                     {
-                        f"{k}_cell_{bt.unit.value}_{i % 15}": v.value
-                        for k, v in vars(bt).items()
+                        f"{k}_cell_{bt.unit}_{i % 15}": v.value
+                        for k, v in bt.get_sensors().items()
                     }
                 )
             return result
@@ -72,11 +74,11 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             await self.pylontech.connect()
             pwr = await self.pylontech.pwr()
-            self.sensors = vars(pwr)
+            self.sensors = pwr.get_sensors()
             unit = await self.pylontech.unit()
-            self.unit_sensors = vars(unit.values[0])
+            self.unit_sensors = unit.values[0].get_sensors()
             bat = await self.pylontech.bat()
-            self.bat_sensors = vars(bat.values[0])
+            self.bat_sensors = bat.values[0].get_sensors()
         finally:
             await self.pylontech.disconnect()
 
