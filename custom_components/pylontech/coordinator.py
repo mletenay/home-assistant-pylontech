@@ -25,7 +25,7 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         entry: ConfigEntry,
         pylontech: PylontechBMS,
         info: InfoCommand,
-        bmu_serials: tuple[str],
+        bmu_serials: dict[str, int],
     ) -> None:
         """Initialize update coordinator."""
         super().__init__(
@@ -39,24 +39,17 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.serial_nr: str = info.module_barcode.value
         self.device_info: DeviceInfo = _device(info)
         self.unit_device_infos: tuple[DeviceInfo] = tuple(
-            _unit_device(info, idx, bmu) for idx, bmu in enumerate(info.bmu_modules)
+            _unit_device(info, bmu_serials[bmu], bmu) for bmu in info.bmu_modules
         )
         self.sensors: dict[str, Sensor] = {}
         self.unit_sensors: dict[str, Sensor] = {}
         self.bat_sensors: dict[str, Sensor] = {}
 
-        # Get stable unit position mapping (in case unit are physically re-ordered)
-        known_positions: dict[str, int] = {b: i for i, b in enumerate(bmu_serials)}
-        serials = len(bmu_serials)
-        for d in self.unit_device_infos:
-            if d["serial_number"] not in bmu_serials:
-                known_positions[d["serial_number"]] = serials
-                serials = serials + 1
-        self._unit_positions: dict[int, int] = {
-            i: known_positions[d["serial_number"]]
-            for i, d in enumerate(self.unit_device_infos)
+        # Create stable unit position mapping (in case unit are physically re-ordered)
+        self._unit_numbers: dict[int, int] = {
+            idx: bmu_serials[bmu] for idx, bmu in enumerate(info.bmu_modules)
         }
-        _LOGGER.debug("Created stable unit number mapping %s", self._unit_positions)
+        _LOGGER.debug("Created stable unit number mapping %s", self._unit_numbers)
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from the inverter."""
@@ -106,11 +99,11 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def get_number_of_units(self) -> int:
         """Return  number of units."""
-        return len(self._unit_positions)
+        return len(self.unit_device_infos)
 
     def get_unit_number(self, unit_idx: int) -> int:
         """Return stable number of unit with specified serial."""
-        return self._unit_positions[unit_idx]
+        return self._unit_numbers[unit_idx]
 
 
 def _device(info: InfoCommand) -> DeviceInfo:

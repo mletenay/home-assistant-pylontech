@@ -1,6 +1,7 @@
 """Support for Pylontech BMS."""
 
 import logging
+import re
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
@@ -32,19 +33,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await pylontech.disconnect()
 
     # Get previously registered devices (to ensure stable order of BMUs)
+    pattern = re.compile(r"BMU #(\d+)")
     device_registry = dr.async_get(hass)
-    bmu_serials = tuple(
-        sorted(
-            {
-                device.serial_number
-                for device in device_registry.devices.get_devices_for_config_entry_id(
-                    entry.entry_id
-                )
-                if "BMU #" in device.name
-            }
+    bmu_serials = {
+        device.serial_number: int(pattern.search(device.name).group(1))
+        for device in device_registry.devices.get_devices_for_config_entry_id(
+            entry.entry_id
         )
-    )
-    _LOGGER.debug("Loaded existing BMU serials %s", bmu_serials)
+        if "BMU #" in device.name
+    }
+    # Add any potentially new bmu
+    new_idx = len(bmu_serials)
+    for serial in info.bmu_modules:
+        if serial not in bmu_serials:
+            bmu_serials[serial] = new_idx
+            new_idx += 1
+    _LOGGER.debug("Loaded stable BMUs order %s", bmu_serials)
 
     # Create update coordinator
     coordinator = PylontechUpdateCoordinator(
