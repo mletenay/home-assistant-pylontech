@@ -75,7 +75,6 @@ class PylontechUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             for i, bt in enumerate(bat.values):
                 bmu = self.get_unit_number(bt.unit)
                 cell = i % 15
-                _LOGGER.debug("Updating cell #%d (bmu #%d) sensors", cell, bmu)
                 result.update(
                     {
                         f"{k}_cell_{bmu}_{cell}": v.value

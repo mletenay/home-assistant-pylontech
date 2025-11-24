@@ -34,15 +34,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Get previously registered devices (to ensure stable order of BMUs)
     device_registry = dr.async_get(hass)
     bmu_serials = tuple(
-        {
-            d.serial_number
-            for d in device_registry.devices.get_devices_for_config_entry_id(
-                entry.entry_id
-            )
-            if "BMU #" in d.name
-        }
+        sorted(
+            {
+                device.serial_number
+                for device in device_registry.devices.get_devices_for_config_entry_id(
+                    entry.entry_id
+                )
+                if "BMU #" in device.name
+            }
+        )
     )
-    _LOGGER.info("Loaded existing BMU serials %s", bmu_serials)
+    _LOGGER.debug("Loaded existing BMU serials %s", bmu_serials)
 
     # Create update coordinator
     coordinator = PylontechUpdateCoordinator(
