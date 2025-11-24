@@ -22,4 +22,7 @@ The component requires the host/IP and the port where the [Pylontech BMS console
 
 ## Exposed sensors
 
-The integration connects to BMS in regular intrervals (default 30s) and executes `pwr` and `unit` console commands to read and report current state (charge, voltage, current, temperature, state, error code etc.) of BMS itself as well as its individual BMUs.
+The integration connects to BMS in regular intrervals (default 30s) and executes `pwr`, `unit` and `bat` console commands to read and report current state (charge, voltage, current, temperature, state, error code etc.) of BMS itself as well as its individual BMUs and their cells.
+
+The management console lists units (in `info` command) from top to bottom - the first unit connected right after the BMS is named BMU #0. However, the `unit` command lists them in reverse order - the bottom unit (farthest from BMS) has number 1 there. Same applies for the `bat` output - the cells are numbered bottom-up - bottom's units cells have number 0-14.  
+The integration takes care of this and even tries to maintain stable order of units (in case they are reshuffled in rack for any reason). To find out which unit is which, the `position` sensor provides physical index in chain - the topmost position is 1.
