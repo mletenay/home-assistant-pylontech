@@ -33,6 +33,19 @@ class Sensor:
         """Return string representation of sensor."""
         return f"{self.name}: {self.value} {self.unit}"
 
+    def set(self, source: str) -> Sensor:
+        """Decode and set value from source string."""
+        return self
+
+    def setValue(self, source: str) -> Sensor:
+        """Decode and set value from source line.
+
+        The input line is assumed to be of a "Label : value" form,
+        so the value starts after first ":" character.
+        """
+        self.set(source[source.index(":") + 1 :])
+        return self
+
 
 class HasSensors:
     """Supeclass for BMS types with sensors attributres."""
@@ -143,6 +156,15 @@ class Voltage(Sensor):
         self.value = int(source) / divider
         return self
 
+    def setValue(self, source: str, divider: int = 1000) -> Sensor:
+        """Decode and set value from source line.
+
+        The input line is assumed to be of a "Label : value" form,
+        so the value starts after first ":" character.
+        """
+        self.set(source[source.index(":") + 1 :], divider)
+        return self
+
 
 class ChargeAh(Sensor):
     """Sensor representing charge [Ah]."""
@@ -241,9 +263,9 @@ class PwrCommand(HasSensors):
 
     def __init__(self, lines: tuple[str]) -> None:
         """Initialize the pwr command."""
-        self.avg_temp = Temp("Average temperature").set(lines[0].split()[2])
-        self.dc_voltage = Voltage("DC Voltage").set(lines[1].split()[3])
-        self.bat_voltage = Voltage("Bat Voltage").set(lines[2].split()[3])
+        self.avg_temp = Temp("Average temperature").setValue(lines[0])
+        self.dc_voltage = Voltage("DC Voltage").setValue(lines[1])
+        self.bat_voltage = Voltage("Bat Voltage").setValue(lines[2])
         chunks = lines[4].split()
         self.volt = Voltage("Voltage").set(chunks[0])
         self.curr = Current("Current").set(chunks[1])
@@ -285,11 +307,11 @@ class BatCommand(HasSensors):
 
     def __init__(self, lines: tuple[str]) -> None:
         """Initialize the bat sensor."""
-        self.avg_temp = Temp("Average Temperature").set(lines[1].split()[1])
-        self.charge_curr = Current("Charge Current").set(lines[2].split()[2])
-        self.discharge_curr = Current("Discharge Current").set(lines[3].split()[2])
-        self.b_state = Text("Bat State").set(lines[4].split()[1])
-        self.bal_volt = Voltage("Bat Voltage").set(lines[5].split()[1], 10)
+        self.avg_temp = Temp("Average Temperature").setValue(lines[1])
+        self.charge_curr = Current("Charge Current").setValue(lines[2])
+        self.discharge_curr = Current("Discharge Current").setValue(lines[3])
+        self.b_state = Text("Bat State").setValue(lines[4])
+        self.bal_volt = Voltage("Bat Voltage").setValue(lines[5], 10)
         self.values: list[BatValues] = []
         cell = len(lines) - 8  # bat returs cells in reverse units order
         for line in lines[7:]:
