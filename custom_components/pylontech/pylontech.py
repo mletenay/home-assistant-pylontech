@@ -208,7 +208,7 @@ class Temp(Sensor):
 class UnitCommand:
     """Pylontech BMS console command 'unit'."""
 
-    def __init__(self, lines: tuple[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         """Initialize the unit command."""
         self.values: list[UnitValues] = []
         nr_of_units = len(lines) - 1
@@ -261,12 +261,15 @@ class UnitValues(HasSensors):
 class PwrCommand(HasSensors):
     """Pylontech BMS console command 'pwr'."""
 
-    def __init__(self, lines: tuple[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         """Initialize the pwr command."""
-        self.avg_temp = Temp("Average temperature").setValue(lines[0])
-        self.dc_voltage = Voltage("DC Voltage").setValue(lines[1])
-        self.bat_voltage = Voltage("Bat Voltage").setValue(lines[2])
-        chunks = lines[4].split()
+        if "Average" in lines[0]:
+            self.avg_temp = Temp("Average temperature").setValue(lines.pop(0))
+        if "DC" in lines[0]:
+            self.dc_voltage = Voltage("DC Voltage").setValue(lines.pop(0))
+        if "Bat" in lines[0]:
+            self.bat_voltage = Voltage("Bat Voltage").setValue(lines.pop(0))
+        chunks = lines[1].split()
         self.volt = Voltage("Voltage").set(chunks[0])
         self.curr = Current("Current").set(chunks[1])
         self.temp = Temp("Temperature").set(chunks[2])
@@ -305,7 +308,7 @@ class PwrCommand(HasSensors):
 class BatCommand(HasSensors):
     """Pylontech BMS console command 'bat'."""
 
-    def __init__(self, lines: tuple[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         """Initialize the bat sensor."""
         self.avg_temp = Temp("Average Temperature").setValue(lines[1])
         self.charge_curr = Current("Charge Current").setValue(lines[2])
@@ -359,7 +362,7 @@ class BatValues(HasSensors):
 class InfoCommand(HasSensors):
     """Pylontech BMS console command 'info'."""
 
-    def __init__(self, lines: tuple[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         """Initialize the info command."""
         source = list(lines)
         self.device_address = Integer("Device address").fetch(source)
@@ -419,7 +422,7 @@ class PylontechBMS:
         self.writer: StreamWriter | None = None
         self.bmus: tuple[str] = ()
 
-    async def _exec_cmd(self, cmd: str) -> tuple[str]:
+    async def _exec_cmd(self, cmd: str) -> list[str]:
         """Send the command to BMS and parse the response."""
         self.writer.write((cmd + "\r").encode("ascii"))
         await asyncio.wait_for(self.writer.drain(), 2)
