@@ -214,7 +214,7 @@ class UnitCommand:
         nr_of_units = len(lines) - 1
         for line in lines[2:]:
             # unit values are presented in reversed oder, from bottom to top
-            self.values.insert(0, UnitValues(line, nr_of_units))
+            self.values.insert(0, UnitValues(line, lines[1], nr_of_units))
 
     def __str__(self) -> str:
         """Return string representation of unit command."""
@@ -228,26 +228,30 @@ class UnitCommand:
 class UnitValues(HasSensors):
     """Class representing parameters of a unit (battery module)."""
 
-    def __init__(self, line: str, nr_of_units: int) -> None:
+    def __init__(self, line: str, header: str, nr_of_units: int) -> None:
         """Initialize the unit values object."""
         chunks = line.split()
-        self.position = Integer("Position").set(chunks[0])
+        self.position = Integer("Position").set(chunks.pop(0))
         self.position.value = nr_of_units - self.position.value
-        self.volt = Voltage("Voltage").set(chunks[1])
-        self.curr = Current("Current").set(chunks[2])
-        self.temp = Temp("Temperature").set(chunks[3])
-        self.cell_temp_low = Temp("Lowest cell temperature").set(chunks[4])
-        self.cell_temp_high = Temp("Highest cell temperature").set(chunks[5])
-        self.cell_volt_low = Voltage("Lowest cell voltage").set(chunks[6])
-        self.cell_volt_high = Voltage("Highest cell voltage").set(chunks[7])
-        self.base_state = Text("Basic state").set(chunks[8])
-        self.volt_state = Text("Voltage state").set(chunks[9])
-        self.temp_state = Text("Temperature state").set(chunks[10])
-        self.charge_ah_perc = Percent("Charge Ah %").set(chunks[11])
-        self.charge_ah = ChargeAh("Charge Ah").set(chunks[12])
-        self.charge_wh_perc = Percent("Charge Wh %").set(chunks[14])
-        self.charge_wh_wh = ChargeWh("Charge Wh").set(chunks[15])
-        # self.Time
+        self.volt = Voltage("Voltage").set(chunks.pop(0))
+        self.curr = Current("Current").set(chunks.pop(0))
+        self.temp = Temp("Temperature").set(chunks.pop(0))
+        self.cell_temp_low = Temp("Lowest cell temperature").set(chunks.pop(0))
+        self.cell_temp_high = Temp("Highest cell temperature").set(chunks.pop(0))
+        self.cell_volt_low = Voltage("Lowest cell voltage").set(chunks.pop(0))
+        self.cell_volt_high = Voltage("Highest cell voltage").set(chunks.pop(0))
+        self.base_state = Text("Basic state").set(chunks.pop(0))
+        self.volt_state = Text("Voltage state").set(chunks.pop(0))
+        self.temp_state = Text("Temperature state").set(chunks.pop(0))
+        self.charge_ah_perc = Percent("Charge Ah %").set(chunks.pop(0))
+        self.charge_ah = ChargeAh("Charge Ah").set(chunks.pop(0))
+        chunks.pop(0)  # mAH
+        if "CoulombWH" in header:
+            self.charge_wh_perc = Percent("Charge Wh %").set(chunks.pop(0))
+            self.charge_wh_wh = ChargeWh("Charge Wh").set(chunks.pop(0))
+        # chunks.pop(0)  # WH
+        # chunks.pop(0)  # Date
+        # chunks.pop(0)  # Time
 
     def __str__(self):
         """Return string representation of unit values."""
@@ -269,32 +273,38 @@ class PwrCommand(HasSensors):
             self.dc_voltage = Voltage("DC Voltage").setValue(lines.pop(0))
         if "Bat" in lines[0]:
             self.bat_voltage = Voltage("Bat Voltage").setValue(lines.pop(0))
-        chunks = lines[1].split()
-        self.volt = Voltage("Voltage").set(chunks[0])
-        self.curr = Current("Current").set(chunks[1])
-        self.temp = Temp("Temperature").set(chunks[2])
-        self.cell_temp_low = Temp("Lowest cell temperature").set(chunks[3])
-        self.cell_temp_high = Temp("Highest cell temperature").set(chunks[4])
-        self.cell_volt_low = Voltage("Lowest cell voltage").set(chunks[5])
-        self.cell_bolt_high = Voltage("Highest cell voltage").set(chunks[6])
-        self.unit_temp_low = Temp("Lowest unit temperature").set(chunks[7])
-        self.unit_temp_high = Temp("Highest unit temperature").set(chunks[8])
-        self.unit_volt_low = Voltage("Lowest unit voltage").set(chunks[9])
-        self.unit_volt_high = Voltage("Highest unit voltage").set(chunks[10])
-        self.base_state = Text("Basic state").set(chunks[11])
-        self.volt_state = Text("Voltage state").set(chunks[12])
-        self.curr_state = Text("Current state").set(chunks[13])
-        self.temp_state = Text("Temperature state").set(chunks[14])
-        self.charge_ah_perc = Percent("Charge Ah %").set(chunks[15])
-        self.charge_ah = ChargeAh("Charge Ah").set(chunks[16])
-        self.charge_wh_perc = Percent("Charge Wh %").set(chunks[18])
-        self.charge_wh_wh = ChargeWh("Charge Wh").set(chunks[19])
-        # time
-        self.cell_volt_state = Text("Cell voltage state").set(chunks[23])
-        self.cell_temp_state = Text("Cell temperature state").set(chunks[24])
-        self.unit_volt_state = Text("Unit voltage state").set(chunks[25])
-        self.unit_temp_state = Text("Unit tempeature state").set(chunks[26])
-        self.error_code = Text("Error code").set(chunks[27])
+        header = lines.pop(0)
+        chunks = lines[0].split()
+
+        self.volt = Voltage("Voltage").set(chunks.pop(0))
+        self.curr = Current("Current").set(chunks.pop(0))
+        self.temp = Temp("Temperature").set(chunks.pop(0))
+        self.cell_temp_low = Temp("Lowest cell temperature").set(chunks.pop(0))
+        self.cell_temp_high = Temp("Highest cell temperature").set(chunks.pop(0))
+        self.cell_volt_low = Voltage("Lowest cell voltage").set(chunks.pop(0))
+        self.cell_bolt_high = Voltage("Highest cell voltage").set(chunks.pop(0))
+        self.unit_temp_low = Temp("Lowest unit temperature").set(chunks.pop(0))
+        self.unit_temp_high = Temp("Highest unit temperature").set(chunks.pop(0))
+        self.unit_volt_low = Voltage("Lowest unit voltage").set(chunks.pop(0))
+        self.unit_volt_high = Voltage("Highest unit voltage").set(chunks.pop(0))
+        self.base_state = Text("Basic state").set(chunks.pop(0))
+        self.volt_state = Text("Voltage state").set(chunks.pop(0))
+        self.curr_state = Text("Current state").set(chunks.pop(0))
+        self.temp_state = Text("Temperature state").set(chunks.pop(0))
+        self.charge_ah_perc = Percent("Charge Ah %").set(chunks.pop(0))
+        self.charge_ah = ChargeAh("Charge Ah").set(chunks.pop(0))
+        chunks.pop(0)  # mAH
+        if "CoulombWH" in header:
+            self.charge_wh_perc = Percent("Charge Wh %").set(chunks.pop(0))
+            self.charge_wh_wh = ChargeWh("Charge Wh").set(chunks.pop(0))
+            chunks.pop(0)  # WH
+        chunks.pop(0)  # Date
+        chunks.pop(0)  # Time
+        self.cell_volt_state = Text("Cell voltage state").set(chunks.pop(0))
+        self.cell_temp_state = Text("Cell temperature state").set(chunks.pop(0))
+        self.unit_volt_state = Text("Unit voltage state").set(chunks.pop(0))
+        self.unit_temp_state = Text("Unit tempeature state").set(chunks.pop(0))
+        self.error_code = Text("Error code").set(chunks.pop(0))
 
     def __str__(self):
         """Return string representation of pwr command."""
