@@ -320,15 +320,22 @@ class BatCommand(HasSensors):
 
     def __init__(self, lines: list[str]) -> None:
         """Initialize the bat sensor."""
-        self.avg_temp = Temp("Average Temperature").setValue(lines[1])
-        self.charge_curr = Current("Charge Current").setValue(lines[2])
-        self.discharge_curr = Current("Discharge Current").setValue(lines[3])
-        self.b_state = Text("Bat State").setValue(lines[4])
-        self.bal_volt = Voltage("Bat Voltage").setValue(lines[5], 10)
+        lines.pop(0)  # Time
+        if "Tempr" in lines[0]:
+            self.avg_temp = Temp("Average Temperature").setValue(lines.pop(0))
+        if "Curr" in lines[0]:
+            self.charge_curr = Current("Charge Current").setValue(lines.pop(0))
+        if "Curr" in lines[0]:
+            self.discharge_curr = Current("Discharge Current").setValue(lines.pop(0))
+        if "State" in lines[0]:
+            self.b_state = Text("Bat State").setValue(lines.pop(0))
+        if "Volt" in lines[0]:
+            self.bal_volt = Voltage("Bat Voltage").setValue(lines.pop(0), 10)
+        header = lines.pop(0)
         self.values: list[BatValues] = []
-        cell = len(lines) - 8  # bat returs cells in reverse units order
-        for line in lines[7:]:
-            self.values.append(BatValues(line, int(cell / 15)))
+        cell = len(lines) - 1  # bat returs cells in reverse units order
+        for line in lines:
+            self.values.append(BatValues(line, header, int(cell / 15)))
             cell = cell - 1
 
     def __str__(self) -> str:
@@ -344,20 +351,22 @@ class BatCommand(HasSensors):
 class BatValues(HasSensors):
     """Class representing paramters of a battery cell."""
 
-    def __init__(self, line: str, unit: int) -> None:
+    def __init__(self, line: str, header: str, unit: int) -> None:
         """Initialize the bat values object."""
         chunks = line.split()
         self.unit = unit
-        self.volt = Voltage("Cell voltage").set(chunks[1])
-        self.curr = Current("Cell current").set(chunks[2])
-        self.tempr = Temp("Cell temperature").set(chunks[3])
-        self.v_state = Text("Cell voltage state").set(chunks[4])
-        self.t_state = Text("Cell temperature state").set(chunks[5])
-        self.charge_ah_perc = Percent("Cell charge Ah %").set(chunks[6])
-        self.charge_ah = ChargeAh("Cell charge Ah").set(chunks[7])
-        self.charge_wh_perc = Percent("Cell charge Wh %").set(chunks[8])
-        self.charge_wh = ChargeWh("Cell charge Wh").set(chunks[9], 1000)
-        self.bal = Text("Cell balance").set(chunks[10])
+        chunks.pop(0)  # Index
+        self.volt = Voltage("Cell voltage").set(chunks.pop(0))
+        self.curr = Current("Cell current").set(chunks.pop(0))
+        self.tempr = Temp("Cell temperature").set(chunks.pop(0))
+        self.v_state = Text("Cell voltage state").set(chunks.pop(0))
+        self.t_state = Text("Cell temperature state").set(chunks.pop(0))
+        self.charge_ah_perc = Percent("Cell charge Ah %").set(chunks.pop(0))
+        self.charge_ah = ChargeAh("Cell charge Ah").set(chunks.pop(0))
+        if "WH" in header:
+            self.charge_wh_perc = Percent("Cell charge Wh %").set(chunks.pop(0))
+            self.charge_wh = ChargeWh("Cell charge Wh").set(chunks.pop(0), 1000)
+        self.bal = Text("Cell balance").set(chunks.pop(0))
         # self.Time
 
     def __str__(self):
