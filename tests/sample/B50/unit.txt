@@ -1,0 +1,6 @@
+AverageTempr: 18650
+Index  Volt   Curr   Tempr  BTlow  BThigh BVlow  BVhigh Base.St  Volt.St  Temp.St  CoulombAH               Time
+1      49545  -144   25000  17000  18800  3300   3305    Dischg   Normal   Normal   68%           33811 mAH 2025-12-04 06:13:53
+2      49522  -144   25000  18000  19000  3297   3304    Dischg   Normal   Normal   67%           33574 mAH 2025-12-04 06:13:53
+3      49388  -144   26000  18000  19000  3238   3304    Dischg   Normal   Normal   15%            7621 mAH 2025-12-04 06:13:53
+4      49503  -144   26000  19000  20000  3285   3303    Dischg   Normal   Normal   68%           33811 mAH 2025-12-04 06:13:53

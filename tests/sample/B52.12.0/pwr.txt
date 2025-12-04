@@ -1,0 +1,6 @@
+AverageTempr   : 20925
+DC Volt        : 398428
+Bat Volt       : 397327
+
+Volt   Curr   Tempr  BTlow  BThigh BVlow  BVhigh UTlow  UThigh UVlow  UVhigh Base.St  Volt.St  Curr.St  Temp.St  CoulombAH                CoulombWH              Time                 B.V.St   B.T.St   U.V.St   U.T.St   Err Code
+394349 0      32000  20000  22000  3230   3293   24000  28000  48990  49395  Idle     Normal   Normal   Normal    20%          10000 mAH  57%           10854 WH 2025-12-05 05:10:18  Normal   Normal   Normal   Normal   0x0

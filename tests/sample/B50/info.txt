@@ -1,0 +1,21 @@
+Device address      : 0
+Manufacturer        : Pylon
+Device name         : CMU
+Board version       : TISP01V10R02_1
+Main Soft version   : B50
+Soft  version       : V2.1
+Sub Soft version    : T4
+Boot  version       : V0.0
+Comm version        : V2.0
+Release Date        : 17-09-27
+Barcode             :
+PCBA Barcode        : R10050017A020214
+Module Barcode      : PPTAP01217928015
+PowerSupply Barcode : R100200179020066
+Device Test Time    : 2017-10-16 11:13:16
+Specification       : 192V/50AH
+Cell Number         : 60
+Max Dischg Curr     : -55000mA
+Max Charge Curr     : 53000mA
+EPONPort rate       : 1200
+Console Port rate   : 115200

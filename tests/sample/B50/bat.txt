@@ -1,0 +1,57 @@
+Time: 2025-12-04 06:13:53
+A.Tempr: 18650
+C.Curr : 25000   mA
+D.Curr : -25000  mA
+B.State: Dischg
+BalVolt: 3360
+Bat  Volt Curr    Tempr   V.State T.State AH(mAH)             Bal
+0    3301 -144    18800   Normal  Normal   68%      33819 mAH   N
+1    3304 -144    18800   Normal  Normal   68%      33811 mAH   N
+2    3304 -144    18800   Normal  Normal   68%      33819 mAH   N
+3    3304 -144    18800   Normal  Normal   68%      33819 mAH   N
+4    3304 -144    18800   Normal  Normal   68%      33811 mAH   N
+5    3303 -144    18000   Normal  Normal   68%      33819 mAH   N
+6    3303 -144    18000   Normal  Normal   68%      33819 mAH   N
+7    3305 -144    18000   Normal  Normal   68%      33811 mAH   N
+8    3302 -144    18000   Normal  Normal   68%      33811 mAH   N
+9    3303 -144    18000   Normal  Normal   68%      33811 mAH   N
+10   3305 -144    17000   Normal  Normal   68%      33811 mAH   N
+11   3303 -144    17000   Normal  Normal   68%      33811 mAH   N
+12   3302 -144    17000   Normal  Normal   68%      33819 mAH   N
+13   3302 -144    17000   Normal  Normal   68%      33811 mAH   N
+14   3300 -144    17000   Normal  Normal   68%      33811 mAH   N
+15   3297 -144    19000   Normal  Normal   68%      33811 mAH   N
+16   3302 -144    19000   Normal  Normal   68%      33819 mAH   N
+17   3304 -144    19000   Normal  Normal   67%      33725 mAH   N
+18   3303 -144    19000   Normal  Normal   68%      33819 mAH   N
+19   3304 -144    19000   Normal  Normal   67%      33747 mAH   N
+20   3303 -144    19000   Normal  Normal   68%      33811 mAH   N
+21   3301 -144    19000   Normal  Normal   68%      33811 mAH   N
+22   3303 -144    19000   Normal  Normal   67%      33747 mAH   N
+23   3303 -144    19000   Normal  Normal   67%      33574 mAH   N
+24   3302 -144    19000   Normal  Normal   67%      33725 mAH   N
+25   3303 -144    18000   Normal  Normal   67%      33747 mAH   N
+26   3302 -144    18000   Normal  Normal   67%      33725 mAH   N
+27   3302 -144    18000   Normal  Normal   67%      33747 mAH   N
+28   3302 -144    18000   Normal  Normal   67%      33725 mAH   N
+29   3301 -144    18000   Normal  Normal   67%      33725 mAH   N
+30   3240 -144    19000   Normal  Normal   70%      35140 mAH   N
+31   3302 -144    19000   Normal  Normal   68%      33811 mAH   N
+32   3301 -144    19000   Normal  Normal   68%      33811 mAH   N
+33   3301 -144    19000   Normal  Normal   67%      33725 mAH   N
+34   3300 -144    19000   Normal  Normal   69%      34477 mAH   N
+35   3300 -144    19000   Normal  Normal   69%      34260 mAH   N
+36   3300 -144    19000   Normal  Normal   68%      33881 mAH   N
+37   3301 -144    19000   Normal  Normal   67%      33747 mAH   N
+38   3303 -144    19000   Normal  Normal   68%      33819 mAH   N
+39   3302 -144    19000   Normal  Normal   68%      33811 mAH   N
+40   3238 -144    18000   Normal  Normal   1mal   68%      33811 mAH   N
+43   3304 -144    18000   Normal  Normal   68%      33920 mAH   N
+44   3295 -144 2 -144    20000   Normal  Normal   68%      33819 mAH   N
+47   3303 -144    20000   Normal  Normal   68%      33819 mAH   N
+48   3301 -144    20000   Normal  Normal   68%      33819 mAH   N
+49   3303 -144    20000   Normal Normal  Normal   68%      33819 mAH   N
+52   3302 -144    19000   Normal  Normal   68%      33819 mAH   N
+53  mAH   N
+57   3302 -144    19000   Normal  Normal   68%      33811 mAH   N
+58   3303 -144    19000   Normal  Nly

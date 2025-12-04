@@ -1,0 +1,55 @@
+Device address      : 0
+Manufacturer        : Pylon
+Device name         : CMU_A
+Board version       : TISP01V10R02_1
+Main Soft version   : B52.12.0
+Soft  version       : V4.5
+Boot  version       : V1.4
+Comm version        : V2.0
+Release Date        : 19-10-31
+
+Barcode             :
+PCBA Barcode        : H100900119BT1910140081
+Module Barcode      : PPTAP01210108048
+PowerSupply Barcode : H200100196130087
+
+Device Test Time    : 2020-03-01 12:51:35
+
+Specification       : 384V/50AH
+Cell Number         : 120
+Max Dischg Curr     : -55000mA
+Max Charge Curr     : 53000mA
+Shut Circuit        : Yes
+Relay Feedback      : Yes
+
+BMU 7 Barcode
+Module:   : PPTAP01A20428669
+PCBA:     : H1004002204T2002170071
+
+BMU 6 Barcode
+Module:   : H221224600360071
+PCBA:     : H300200222C10480101042
+
+BMU 5 Barcode
+Module:   : H221224600360085
+PCBA:     : H300200222C10515003910
+
+BMU 4 Barcode
+Module:   : PPTAP01A20428668
+PCBA:     : H1004002204T2002170277
+
+BMU 3 Barcode
+Module:   : PPTAP01A20428661
+PCBA:     : H1004002204T2002260304
+
+BMU 2 Barcode
+Module:   : PPTAP01A20428662
+PCBA:     : H1004002204T2002170176
+
+BMU 1 Barcode
+Module:   : PPTAP01A20428363
+PCBA:     : H1004002204T2002170888
+
+BMU 0 Barcode
+Module:   : H221224600360082
+PCBA:     : H300200222C10480101049

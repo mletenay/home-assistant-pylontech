@@ -1,0 +1,3 @@
+AverageTempr: 18650
+Volt   Curr   Tempr  BTlow  BThigh BVlow  BVhigh UTlow  UThigh UVlow  UVhigh Base.St  Volt.St  Curr.St  Temp.St  CoulombAH               Time                 B.V.St   B.T.St   U.V.St   U.T.St   Err Code
+197958 -144   26000  17000  20000  3238   3305   25000  26000  49388  49545  Dischg   Normal   Normal   Normal   15%            7621 mAH 2025-12-04 06:13:53  Normal   Normal   Normal   Normal   0x0

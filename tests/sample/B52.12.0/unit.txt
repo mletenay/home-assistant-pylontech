@@ -1,0 +1,10 @@
+AverageTempr: 20941
+Index  Volt   Curr   Tempr  BTlow  BThigh BVlow  BVhigh Base.St  Volt.St  Temp.St  CoulombAH                CoulombWH               Time
+1      48996  0      27000  20000  20000  3230   3288    Idle     Normal   Normal    20%          10000 mAH  51%            1234 WH 2025-12-05 05:10:38
+2      49377  0      24000  21000  21000  3291   3292    Idle     Normal   Normal    59%          29354 mAH  57%            1366 WH 2025-12-05 05:10:38
+3      49380  0      24000  21000  21000  3292   3292    Idle     Normal   Normal    59%          29343 mAH  57%            1365 WH 2025-12-05 05:10:38
+4      49335  0      27000  20000  21000  3285   3291    Idle     Normal   Normal    59%          29384 mAH  58%            1380 WH 2025-12-05 05:10:38
+5      49314  0      27000  20400  21000  3276   3290    Idle     Normal   Normal    59%          29423 mAH  58%            1380 WH 2025-12-05 05:10:38
+6      49212  0      27000  21000  21000  3244   3291    Idle     Normal   Normal    56%          27786 mAH  57%            1369 WH 2025-12-05 05:10:38
+7      49341  0      28000  21000  21000  3287   3292    Idle     Normal   Normal    59%          29432 mAH  58%            1380 WH 2025-12-05 05:10:38
+8      49395  0      25000  22000  22000  3293   3293    Idle     Normal   Normal    59%          29427 mAH  58%            1380 WH 2025-12-05 05:10:38
