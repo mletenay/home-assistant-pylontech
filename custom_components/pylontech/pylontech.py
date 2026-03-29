@@ -443,11 +443,11 @@ class PylontechBMS:
 
     async def _exec_cmd(self, cmd: str) -> list[str]:
         """Send the command to BMS and parse the response."""
-        self.writer.write((cmd + "\r").encode("ascii"))
+        self.writer.write((cmd + "\n").encode("ascii"))
         await asyncio.wait_for(self.writer.drain(), 2)
         lines = []
         linebytes = bytearray()
-        while linebytes != b"pylon>":
+        while linebytes not in (b"pylon>", b"pylon_debug>"):
             # Read it by smaller chunks since on linux
             # large reads somehow weirdly do not work
             data = await asyncio.wait_for(self.reader.read(120), 2)
